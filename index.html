@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Folier's Inn</title>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #1a0f0a;
+}
+
+.vn-wrap {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  user-select: none;
+}
+
+.vn-cg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+  z-index: 0;
+}
+
+.vn-cg-ph {
+  position: absolute;
+  inset: 0;
+  background: #2a1a10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 20px;
+  gap: 6px;
+  color: #5a3010;
+  font-size: 12px;
+  letter-spacing: 1px;
+  z-index: 0;
+}
+
+.vn-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,5,2,0.25);
+  z-index: 1;
+}
+
+.vn-click-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 110px;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.vn-dialogue {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  background: rgba(253,250,246,0.96);
+  border-top: 2px solid #3d1010;
+  z-index: 5;
+  padding: 0 300px 10px 14px;
+}
+
+.vn-speaker-tab {
+  display: inline-block;
+  background: #3d1010;
+  color: #f5ede0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 14px;
+  margin-bottom: 6px;
+}
+
+.vn-text {
+  font-size: 12px;
+  color: #3d1010;
+  line-height: 1.65;
+  height: 40px;
+  overflow: hidden;
+}
+
+.vn-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 11px;
+  background: #3d1010;
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 0.9s step-end infinite;
+}
+
+@keyframes blink {
+  0%,100% { opacity:1; }
+  50%     { opacity:0; }
+}
+
+.vn-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.vn-nav { display: flex; gap: 6px; }
+
+.vn-btn {
+  background: #3d1010;
+  color: #f5ede0;
+  border: none;
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.vn-btn:hover    { background: #5c1a1a; }
+.vn-btn:disabled { background: #c4a882; cursor: default; }
+
+.vn-btn.ghost {
+  background: transparent;
+  border: 1px solid #c4a882;
+  color: #7a3b1e;
+}
+
+.vn-btn.ghost:hover { background: #f0e4d0; }
+
+.vn-progress {
+  font-size: 10px;
+  color: #c4a882;
+  letter-spacing: 1px;
+}
+
+.vn-music-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 10;
+  background: rgba(61,16,16,0.75);
+  border: 1px solid #7a3b1e;
+  color: #f5ede0;
+  font-size: 14px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-family: 'Courier Prime', monospace;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vn-music-btn:hover {
+  background: rgba(92,26,26,0.9);
+}
+
+.vn-music-btn.muted {
+  color: #c4a882;
+  text-decoration: line-through;
+}
+
+.vn-sprite-wrap {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 78%;
+  display: flex;
+  align-items: flex-end;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.vn-sprite {
+  height: 100%;
+  width: 280px;
+  object-fit: contain;
+  object-position: bottom;
+  display: none;
+  filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.6));
+}
+
+/* ── End Screen ──────────────────────────────────────────────────────────── */
+.vn-end-screen {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 2s ease;
+}
+
+.vn-end-screen.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.vn-end-btn {
+  background: none;
+  border: 1px solid #5a3010;
+  color: #7a3b1e;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1s ease, transform 1s ease, background 0.2s, color 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.vn-end-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vn-end-btn:hover {
+  background: #3d1010;
+  color: #f5ede0;
+  border-color: #3d1010;
+}
+.vn-sprite-ph {
+  height: 100%;
+  width: 280px;
+  border: 1.5px dashed #3d1010;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #5a2010;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 8px;
+  background: rgba(80,20,10,0.5);
+}
+</style>
+</head>
+<body>
+<div class="vn-wrap">
+
+  <!-- Background Music -->
+  <audio id="vn-bgm" loop>
+    <source src="bgm.mp3" type="audio/mpeg"/>
+    <source src="bgm.ogg" type="audio/ogg"/>
+  </audio>
+
+  <audio id="vn-bgm" loop>
+    <source src="bgm.mp3" type="audio/mpeg"/>
+    <source src="bgm.ogg" type="audio/ogg"/>
+  </audio>
+  <button class="vn-music-btn muted" id="vn-music-btn" onclick="toggleMusic()">♪</button>
+
+  <div class="vn-cg-ph" id="vn-cg-ph">
+    <span>cg-background.png</span>
+    <span style="font-size:10px;color:#3d1a08;">place background here</span>
+  </div>
+  <img id="vn-cg" class="vn-cg" src="cg-background.png" alt="CG"
+       onerror="this.style.display='none';document.getElementById('vn-cg-ph').style.display='flex';"/>
+
+  <div class="vn-dim"></div>
+  <div class="vn-click-area" onclick="skipOrAdvance()"></div>
+
+  <div class="vn-dialogue">
+    <div class="vn-speaker-tab" id="vn-speaker">Lairus</div>
+    <div class="vn-text">
+      <span id="vn-typed"></span><span class="vn-cursor"></span>
+    </div>
+    <div class="vn-controls">
+      <div class="vn-nav">
+        <button class="vn-btn" id="btn-next" onclick="skipOrAdvance()">Next ▸</button>
+      </div>
+      <span class="vn-progress" id="vn-progress">1 / 4</span>
+    </div>
+  </div>
+
+  <div class="vn-sprite-wrap">
+    <img id="vn-sprite" class="vn-sprite" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Gatto_europeo4.jpg/400px-Gatto_europeo4.jpg" alt="Lairus"
+         onerror="this.style.display='none';document.getElementById('vn-sprite-ph').style.display='flex';"/>
+    <div class="vn-sprite-ph" id="vn-sprite-ph">
+      <span>sprite-lairus.png</span>
+    </div>
+  </div>
+
+  <!-- End Screen -->
+  <div class="vn-end-screen" id="vn-end-screen">
+    <a class="vn-end-btn" id="vn-end-btn" href="YOUR_LINK_HERE" target="_blank">
+      Enter
+    </a>
+  </div>
+
+</div>
+<script>
+// ── Music ────────────────────────────────────────────────────────────────────
+const bgm      = document.getElementById('vn-bgm');
+const musicBtn = document.getElementById('vn-music-btn');
+let musicOn    = false;
+bgm.volume     = 0.4;
+
+function toggleMusic() {
+  if (musicOn) {
+    bgm.pause();
+    musicOn = false;
+    musicBtn.classList.add('muted');
+  } else {
+    bgm.play().catch(() => {});
+    musicOn = true;
+    musicBtn.classList.remove('muted');
+  }
+}
+
+document.addEventListener('click', function startBgm() {
+  if (!musicOn) {
+    bgm.play().then(() => {
+      musicOn = true;
+      musicBtn.classList.remove('muted');
+    }).catch(() => {});
+  }
+  document.removeEventListener('click', startBgm);
+}, { once: true });
+
+// ── Scenes ───────────────────────────────────────────────────────────────────
+const L = 'sprite-Mauvry.png';
+const M = 'sprite-Klara.png';
+const R = 'sprite-who.png';
+const LUS = 'sprite-Lus.png';
+
+const one = 'sim-flash-1.png';
+const two = 'sim-flash-2.png';
+const three = 'sim-flash-3.png';
+const four = 'sim-flash-4.png';
+const five = 'sim-flash-5.png';
+const six = 'sim-flash-6.png';
+const seven = 'sim-flash-7.png';
+const eight = 'sim-flash-8.png';
+const nine = 'sim-flash-9.png';
+const ten = 'sim-flash-10.png';
+const eone = 'sim-flash-11.png';
+const etwo = 'sim-flash-12.png';
+const ethree = 'sim-flash-13.png';
+const efour = 'sim-flash-14.png';
+const efive = 'sim-flash-15.png';
+const esix = 'sim-flash-16.png';
+const eseven = 'sim-flash-17.png';
+const eeight = 'sim-flash-18.png';
+const enine = 'sim-flash-19.png';
+const eten = 'sim-flash-20.png';
+const black = 'black.png';
+const red = 'red.png';
+
+const SCENES = [
+  { speaker:'Klara',  sprite:M, cg:two, text:'This... Is not the headquarters.' },
+  { speaker:'Klara',  sprite:M, cg:two, text:'Where the hell are we?' },
+  { speaker:'Mauvry', sprite:L, cg:two, text:'A... Point zero, maybe?' },
+  { speaker:'Mauvry', sprite:L, cg:two, text:'This... Place is weird. The furniture is all mismatched...' },
+  { speaker:'Klara',  sprite:M, cg:five, text:'Stay vigilant.' },
+  { speaker:'Mauvry',  sprite:L, cg:three, text:'It... smells like flowers.' },
+  { speaker:'Klara', sprite:L, cg:four, text:'...' },
+  { speaker:'Klara', sprite:L, cg:five, text:'...' },
+  { speaker:'Klara',  sprite:M, cg:six, text:'Something\'s up.' },
+  { speaker:'Mauvry', sprite:L, cg:eight, text:'Someone\'s here?' },
+  { speaker:'Klara', sprite:M, cg:seven, text:'Impossible. Point Zeroes are not inhabited. Senior Agent Lairus said so, remember?' },
+  { speaker:'Mauvry', sprite:L, cg:eight, text:'Another set of agents?' },
+  { speaker:'Klara',  sprite:M, cg:four, text:'We should\'ve seen another vehicle.' },
+  { speaker:'Klara',  sprite:R, cg:four, text:'No agents here.' },
+  { speaker:'Klara',  sprite:R, cg:four, text:'Just the two of us.' },
+  { speaker:'Mauvry', sprite:L, cg:four, text:'What\'s happening to yo-' },
+
+  { speaker:'Narrator',  sprite:R, cg:four, text:'The two figures stood still. Surprised to see someone.' },
+  { speaker:'Narrator',  sprite:R, cg:four, text:'They\'d appear calm as they realize they\'re only seeing Lus.' },
+
+  { speaker:'Klara', sprite:M, cg:four, text:'Lus?' },
+  { speaker:'Lus',  sprite:LUS, cg:nine, text:'That\'s me!' },
+  { speaker:'Lus',  sprite:LUS, cg:nine, text:'Visitors? I am happy to have visitors! Always waiting for one!' },
+  { speaker:'Mauvry',  sprite:L, cg:ten, text:'Oh.. but.. Why are you.. here alone?' },
+  { speaker:'Mauvry',  sprite:LUS, cg:nine, text:'Kids are not supposed to be here. It\'s not safe. ' },
+
+  { speaker:'Klara', sprite:M, cg:nine, text:'Stay back.' },
+  { speaker:'', sprite:R, cg:eone, text:'' },
+  { speaker:'', sprite:R, cg:etwo, text:'' },
+  { speaker:'Lus', sprite:LUS, cg:etwo, text:'The two rude women cannot go anywhere. The door does not exist.' },
+  { speaker:'', sprite:R, cg:ethree, text:'' },
+  { speaker:'Lus', sprite:LUS, cg:efour, text:'Watcher.' },
+  { speaker:'Mauvry',  sprite:L, cg:efive, text:'Stay back, Klara.' },
+  { speaker:'Lus', sprite:LUS, cg:ethree, text:'Watcher.' },
+  { speaker:'Lus', sprite:LUS, cg:ethree, text:'Watcher.' },
+  { speaker:'Lus', sprite:LUS, cg:ethree, text:'Watcher.' },
+
+  { speaker:'Lus', sprite:LUS, cg:black, text:'' },
+  { speaker:'', sprite:R, cg:black, text:'Lus snaps her hand.' },
+  { speaker:'', sprite:R, cg:red, text:'' },
+  { speaker:'', sprite:R, cg:esix, text:'' },
+  { speaker:'', sprite:R, cg:eseven, text:'' },
+  { speaker:'', sprite:R, cg:eeight, text:'' },
+  { speaker:'', sprite:R, cg:enine, text:'' },
+  { speaker:'', sprite:R, cg:eten, text:'Mauvry\'s drenched in blood and Klara\'s head had exploded. She limps lifeless on Mauvry\'s side.' },
+
+  { speaker:'Lus', sprite:LUS, cg:four, text:'Oh-!' },
+  { speaker:'Lus', sprite:LUS, cg:four, text:'I didn\'t mean that! I was threatening the watcher!' },
+  { speaker:'Lus', sprite:LUS, cg:four, text:'Your friend has a Watcher!' },
+  { speaker:'Lus', sprite:LUS, cg:four, text:'See? See?' },
+
+  { speaker:'', sprite:R, cg:eeight, text:'' },
+  { speaker:'Mauvry',  sprite:L, cg:eseven, text:'...' },
+  { speaker:'', sprite:R, cg:enine, text:'' },
+  { speaker:'', sprite:R, cg:black, text:'And that\'s when Mauvry screamed until her vision went dark.' }, 
+];
+
+let current=0, typing=false, typeTimer=null, fullText='', charIdx=0;
+const elTyped    = document.getElementById('vn-typed');
+const elSpeaker  = document.getElementById('vn-speaker');
+const elProgress = document.getElementById('vn-progress');
+const elSprite   = document.getElementById('vn-sprite');
+const elSpritePh = document.getElementById('vn-sprite-ph');
+const elCg       = document.getElementById('vn-cg');
+const elCgPh     = document.getElementById('vn-cg-ph');
+const btnNext    = document.getElementById('btn-next');
+
+function loadScene(idx) {
+  const s = SCENES[idx];
+  elSpeaker.textContent  = s.speaker;
+  elProgress.textContent = (idx+1)+' / '+SCENES.length;
+  btnNext.textContent    = idx === SCENES.length-1 ? 'End ▸' : 'Next ▸';
+  elSprite.src = s.sprite;
+  elSprite.style.display = 'block';
+  elSprite.onerror = () => { elSprite.style.display='none'; elSpritePh.style.display='flex'; };
+  elSpritePh.style.display = 'none';
+  if (s.cg) {
+    elCg.src = s.cg;
+    elCg.style.display = 'block';
+    elCg.onerror = () => { elCg.style.display='none'; elCgPh.style.display='flex'; };
+    elCgPh.style.display = 'none';
+  }
+  startTyping(s.text);
+}
+
+function startTyping(text) {
+  if (typeTimer) clearInterval(typeTimer);
+  fullText = text; charIdx = 0; typing = true;
+  elTyped.textContent = '';
+  typeTimer = setInterval(() => {
+    if (charIdx < fullText.length) {
+      elTyped.textContent += fullText[charIdx++];
+    } else {
+      clearInterval(typeTimer); typeTimer=null; typing=false;
+    }
+  }, 22);
+}
+
+function skipOrAdvance() {
+  if (typing) {
+    clearInterval(typeTimer); typeTimer=null; typing=false;
+    elTyped.textContent = fullText;
+    return;
+  }
+  if (current < SCENES.length-1) {
+    current++;
+    loadScene(current);
+  } else {
+    triggerEnd();
+  }
+}
+
+function triggerEnd() {
+  const endScreen = document.getElementById('vn-end-screen');
+  const endBtn    = document.getElementById('vn-end-btn');
+  endScreen.classList.add('visible');
+  setTimeout(() => {
+    endBtn.classList.add('visible');
+  }, 2800);
+}
+
+loadScene(0);
+</script>
+</body>
+</html>
